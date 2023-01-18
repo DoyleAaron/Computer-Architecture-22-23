@@ -1,7 +1,7 @@
 *-----------------------------------------------------------
-* Title      :
-* Written by :
-* Date       :
+* Title      : Part 3 
+* Written by : Aaron Doyle
+* Date       : 18/01/2023
 * Description:
 *-----------------------------------------------------------
     ORG $1000
@@ -24,7 +24,9 @@ START:
  SIMHALT
 text dc.b 'Data Register: ',0
 *This line of code is assigning the text "Data Register: " to the text title 'text'
- END START
+ END START
+
+
 
 *~Font name~Courier New~
 *~Font size~10~

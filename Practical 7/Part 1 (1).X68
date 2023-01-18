@@ -1,7 +1,7 @@
 *-----------------------------------------------------------
-* Title      :
-* Written by :
-* Date       :
+* Title      : Part 1
+* Written by : Aaron Doyle
+* Date       : 18/01/23
 * Description:
 *-----------------------------------------------------------
     ORG    $1000
@@ -24,6 +24,7 @@ START:                  ; first instruction of program
 
 
     END    START        ; last line of source
+
 
 
 *~Font name~Courier New~
