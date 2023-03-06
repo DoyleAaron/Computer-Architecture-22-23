@@ -144,8 +144,9 @@ GAMELOOP:
     BSR     UPDATE                  ; Update positions and points
     BSR     IS_PLAYER_ON_GND        ; Check if player is on ground
     BSR     CHECK_COLLISIONS        ; Check for Collisions
+    BSR     PLYR_HEALTH_CHECK       ; Checking if the players health is 0
     BSR     DRAW                    ; Draw the Scene
-    BSR     FLOOR_DRAW
+    BSR     FLOOR_DRAW              : Draw the floor
     BRA     GAMELOOP                ; Loop back to GameLoop
 
 *-----------------------------------------------------------
@@ -308,10 +309,13 @@ DRAW_PLYR_DATA:
 * Description   : Updating the players health if they hit the enemy
 *-----------------------------------------------------------
 PLYR_HEALTH_CHECK:
-    
- 
-    
-   
+
+    MOVE.B  #0, D0
+    CMP.B   PLAYER_HEALTH, D0
+    BEQ     EXIT
+    RTS
+     
+  
 *-----------------------------------------------------------
 * Subroutine    : Player is on Ground
 * Description   : Check if the Player is on or off Ground
