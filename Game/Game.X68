@@ -30,13 +30,12 @@ PLYR_W_INIT EQU         08          ; Players initial Width
 PLYR_H_INIT EQU         08          ; Players initial Height
 
 PLYR_DFLT_V EQU         00          ; Default Player Velocity
-PLYR_JUMP_V EQU        -20          ; Player Jump Velocity
+PLYR_JUMP_V EQU        -10          ; Player Jump Velocity
 PLYR_DFLT_G EQU         01          ; Player Default Gravity
 
 GND_TRUE    EQU         01          ; Player on Ground True
 GND_FALSE   EQU         00          ; Player on Ground False
-
-RUN_INDEX   EQU         00          ; Player Run Sound Index  
+  
 JMP_INDEX   EQU         01          ; Player Jump Sound Index  
 OPPS_INDEX  EQU         02          ; Player Opps Sound Index
 
@@ -47,7 +46,7 @@ ENMY_H_INIT EQU         08          ; Enemy initial Height
 * Section       : Game Stats
 * Description   : Points
 *-----------------------------------------------------------
-POINTS      EQU         01          ; Points added
+POINTS      EQU         00          ; Points added
 
 *-----------------------------------------------------------
 * Section       : Keyboard Keys
@@ -64,7 +63,6 @@ ESCAPE      EQU         $1B         ; Escape ASCII Keycode
 *-----------------------------------------------------------
 INITIALISE:
     ; Initialise Sounds
-    BSR     RUN_LOAD                ; Load Run Sound into Memory
     BSR     JUMP_LOAD               ; Load Jump Sound into Memory
     BSR     OPPS_LOAD               ; Load Opps (Collision) Sound into Memory
 
@@ -131,13 +129,12 @@ INITIALISE:
 	TRAP	#15                     ; Trap (Perform action)
 
 *-----------------------------------------------------------
-* Subroutine    : Game
-* Description   : Game including main GameLoop. GameLoop is like
+* Subroutine    : Gameloop
+* Description   : This is the main GameLoop. GameLoop is like
 * a while loop in that it runs forever until interupted
 * (Input, Update, Draw). The Enemies Run at Player Jump to Avoid
 *-----------------------------------------------------------
-GAME:
-    BSR     PLAY_RUN                ; Play Run Wav
+
 GAMELOOP:
     ; Main Gameloop
     BSR     INPUT                   ; Check Keyboard Input
@@ -187,33 +184,33 @@ PROCESS_INPUT:
 *-----------------------------------------------------------
 UPDATE:
     ; Update the Players Positon based on Velocity and Gravity
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.L  PLYR_VELOCITY, D1       ; Fetch Player Velocity
-    MOVE.L  PLYR_GRAVITY, D2        ; Fetch Player Gravity
-    ADD.L   D2,         D1          ; Add Gravity to Velocity
-    MOVE.L  D1,         PLYR_VELOCITY ; Update Player Velocity
-    ADD.L   PLAYER_Y,   D1          ; Add Velocity to Player
-    MOVE.L  D1,         PLAYER_Y    ; Update Players Y Position 
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.L  PLYR_VELOCITY, D1           ; Fetch Player Velocity
+    MOVE.L  PLYR_GRAVITY, D2            ; Fetch Player Gravity
+    ADD.L   D2,         D1              ; Add Gravity to Velocity
+    MOVE.L  D1,         PLYR_VELOCITY   ; Update Player Velocity
+    ADD.L   PLAYER_Y,   D1              ; Add Velocity to Player
+    MOVE.L  D1,         PLAYER_Y        ; Update Players Y Position 
 
     ; Move the Enemy
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    CLR.L   D1                      ; Clear the contents of D0
-    MOVE.L  ENEMY_X,    D1          ; Move the Enemy X Position to D0
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    CLR.L   D1                          ; Clear the contents of D0
+    MOVE.L  ENEMY_X,    D1              ; Move the Enemy X Position to D0
     CMP.L   #00,        D1
-    BLE     RESET_ENEMY_POSITION    ; Reset Enemy if off Screen
-    BRA     MOVE_ENEMY              ; Move the Enemy
+    BLE     RESET_ENEMY_POSITION        ; Reset Enemy if off Screen
+    BRA     MOVE_ENEMY                  ; Move the Enemy
 
-    RTS                             ; Return to subroutine  
+    RTS                                 ; Return to subroutine  
 
 *-----------------------------------------------------------
 * Subroutine    : Move Enemy
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #05,        ENEMY_X     ; Move enemy by X Value
+    SUB.L   #10,        ENEMY_X         ; Move enemy by X Value which is 10
     RTS
 
-*-----------------------------------------------------------
+*-----------------------------------------------------------    
 * Subroutine    : Reset Enemy
 * Description   : Reset Enemy if to passes 0 to Right of Screen
 *-----------------------------------------------------------
@@ -385,27 +382,14 @@ DELAY:
 * Description   : Perform a Idle
 *----------------------------------------------------------- 
 IDLE:
-    BSR     PLAY_RUN                ; Play Run Wav
+
     RTS                             ; Return to subroutine
 
 *-----------------------------------------------------------
 * Subroutines   : Sound Load and Play
 * Description   : Initialise game sounds into memory 
-* Current Sounds are RUN, JUMP and Opps for Collision
+* Current Sounds are JUMP and Opps for Collision
 *-----------------------------------------------------------
-RUN_LOAD:
-    LEA     RUN_WAV,    A1          ; Load Wav File into A1
-    MOVE    #RUN_INDEX, D1          ; Assign it INDEX
-    MOVE    #71,        D0          ; Load into memory
-    TRAP    #15                     ; Trap (Perform action)
-    RTS                             ; Return to subroutine
-
-PLAY_RUN:
-    MOVE    #RUN_INDEX, D1          ; Load Sound INDEX
-    MOVE    #72,        D0          ; Play Sound
-    TRAP    #15                     ; Trap (Perform action)
-    RTS                             ; Return to subroutine
-
 JUMP_LOAD:
     LEA     JUMP_WAV,   A1          ; Load Wav File into A1
     MOVE    #JMP_INDEX, D1          ; Assign it INDEX
@@ -599,7 +583,6 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 * generate and Audacity to convert MP3 to WAV
 *-----------------------------------------------------------
 JUMP_WAV        DC.B    'jump.wav',0        ; Jump Sound
-RUN_WAV         DC.B    'run.wav',0         ; Run Sound
 OPPS_WAV        DC.B    'opps.wav',0        ; Collision Opps
 
     END    START        ; last line of source
