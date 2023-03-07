@@ -14,7 +14,6 @@ START:                  ; first instruction of program
 * Trap CODES
 TC_SCREEN   EQU         33          ; Screen size information trap code
 TC_S_SIZE   EQU         00          ; Places 0 in D1.L to retrieve Screen width and height in D1.L
-                                    ; First 16 bit Word is screen Width and Second 16 bits is screen Height
 TC_KEYCODE  EQU         19          ; Check for pressed keys
 TC_DBL_BUF  EQU         92          ; Double Buffer Screen Trap Code
 TC_CURSR_P  EQU         11          ; Trap code cursor position
@@ -141,9 +140,10 @@ GAMELOOP:
     BSR     UPDATE                  ; Update positions and points
     BSR     IS_PLAYER_ON_GND        ; Check if player is on ground
     BSR     CHECK_COLLISIONS        ; Check for Collisions
-    BSR     PLAYER_HEALTH_CHECK       ; Checking if the players health is 0
+    BSR     PLAYER_HEALTH_CHECK     ; Checking if the players health is 0
     BSR     DRAW                    ; Draw the Scene
     BSR     FLOOR_DRAW              ; Draw the floor
+    BSR     POINTS_LOOP             ; Increments the points
     BSR     DELAY                   ; Slows the speed of the game down
     BRA     GAMELOOP                ; Loop back to GameLoop
 
@@ -177,6 +177,18 @@ PROCESS_INPUT:
     BEQ     JUMP                    ; Jump
     BRA     IDLE                    ; Or Idle
     RTS                             ; Return to subroutine
+    
+*-----------------------------------------------------------
+* Subroutine    : Points Loop
+* Description   : A loop that increments the points by one each time
+*-----------------------------------------------------------
+POINTS_LOOP:
+    MOVE.L      #0, D3
+    ADD.L       #1, D3
+    ADD.L       PLAYER_SCORE, D3
+    MOVE.L      D3, PLAYER_SCORE
+   
+    
 
 *-----------------------------------------------------------
 * Subroutine    : Update
@@ -207,7 +219,7 @@ UPDATE:
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #10,        ENEMY_X         ; Move enemy by X Value which is 10
+    SUB.L   #8,        ENEMY_X         ; Move enemy by X Value which is 8 
     RTS
 
 *-----------------------------------------------------------    
@@ -373,7 +385,7 @@ PLAYER_HEALTH_CHECK:
 *-----------------------------------------------------------
 DELAY:
     MOVE.L      #1, D1
-    MOVEQ       #23, D0
+    MOVEQ       #23, D0             ;This trap code creates a delay in the code 
     TRAP        #15
 
 
@@ -481,31 +493,26 @@ PLAYER_X_LTE_TO_ENEMY_X_PLUS_W:
     ADD.L   ENMY_W_INIT,D2          ; Set Enemy width X + Width
     CMP.L   D1,         D2          ; Do the Overlap ?
     BLE     PLAYER_X_PLUS_W_LTE_TO_ENEMY_X  ; Less than or Equal ?
-    BRA     COLLISION_CHECK_DONE    ; If not no collision
+    RTS
 PLAYER_X_PLUS_W_LTE_TO_ENEMY_X:     ; Check player is not  
     ADD.L   PLYR_W_INIT,D1          ; Move Player Width to D1
     MOVE.L  ENEMY_X,    D2          ; Move Enemy X to D2
     CMP.L   D1,         D2          ; Do they OverLap ?
     BGE     PLAYER_Y_LTE_TO_ENEMY_Y_PLUS_H  ; Less than or Equal
-    BRA     COLLISION_CHECK_DONE    ; If not no collision   
+    RTS   
 PLAYER_Y_LTE_TO_ENEMY_Y_PLUS_H:     
     MOVE.L  PLAYER_Y,   D1          ; Move Player Y to D1
     MOVE.L  ENEMY_Y,    D2          ; Move Enemy Y to D2
     ADD.L   ENMY_H_INIT,D2          ; Set Enemy Height to D2
     CMP.L   D1,         D2          ; Do they Overlap ?
     BLE     PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y  ; Less than or Equal
-    BRA     COLLISION_CHECK_DONE    ; If not no collision 
+    RTS 
 PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
     ADD.L   PLYR_H_INIT,D1          ; Add Player Height to D1
     MOVE.L  ENEMY_Y,    D2          ; Move Enemy Height to D2  
     CMP.L   D1,         D2          ; Do they OverLap ?
     BGE     COLLISION               ; Collision !
-    BRA     COLLISION_CHECK_DONE    ; If not no collision
-COLLISION_CHECK_DONE:               ; No Collision Update points
-    ADD.L   #POINTS,    D1          ; Move points upgrade to D1
-    ADD.L   PLAYER_SCORE,D1         ; Add to current player score
-    MOVE.L  D1, PLAYER_SCORE        ; Update player score in memory
-    RTS                             ; Return to subroutine
+    RTS
 
 COLLISION:
     BSR     PLAY_OPPS               ; Play Opps Wav
@@ -586,6 +593,7 @@ JUMP_WAV        DC.B    'jump.wav',0        ; Jump Sound
 OPPS_WAV        DC.B    'opps.wav',0        ; Collision Opps
 
     END    START        ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~
