@@ -94,7 +94,7 @@ INITIALISE:
     
     ;Initialise Player Health
     CLR.L   D1                         ;Clear contents of D1
-    MOVE.L  #50,        D1             ;Player health set to 50
+    MOVE.L  #5,        D1             ;Player lives set to 5
     MOVE.L  D1,         PLAYER_HEALTH
 
     ; Initialise Player Velocity
@@ -525,8 +525,7 @@ COLLISION_CHECK_DONE:               ; No Collision Update points
 
 COLLISION:
     BSR     PLAY_OPPS               ; Play Opps Wav
-    SUB     #1, PLAYER_HEALTH       ; Subtracting 1 from the players health every time theres a collision
-    BLE     RESET_ENEMY_POSITION    ; If the user gets hit it moves the enemy back so they dont get stuck in the enemy
+    DBF     D0, PLAYER_HEALTH    
     RTS                             ; Return to subroutine
 
 *-----------------------------------------------------------
@@ -552,7 +551,7 @@ EXIT:
 *-----------------------------------------------------------
 SCORE_MSG       DC.B    'Score : ', 0       ; Score Message
 
-HEALTH_MSG      DC.B    'Health:', 0        ; Health Position Message
+HEALTH_MSG      DC.B    'Lives:', 0        ; Health Position Message
 
 EXIT_MSG        DC.B    'Exiting....', 0    ; Exit Message
 
