@@ -144,9 +144,10 @@ GAMELOOP:
     BSR     UPDATE                  ; Update positions and points
     BSR     IS_PLAYER_ON_GND        ; Check if player is on ground
     BSR     CHECK_COLLISIONS        ; Check for Collisions
-    BSR     PLYR_HEALTH_CHECK       ; Checking if the players health is 0
+    BSR     PLAYER_HEALTH_CHECK       ; Checking if the players health is 0
     BSR     DRAW                    ; Draw the Scene
-    BSR     FLOOR_DRAW              : Draw the floor
+    BSR     FLOOR_DRAW              ; Draw the floor
+    BSR     DELAY                   ; Slows the speed of the game down
     BRA     GAMELOOP                ; Loop back to GameLoop
 
 *-----------------------------------------------------------
@@ -209,7 +210,7 @@ UPDATE:
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #01,        ENEMY_X     ; Move enemy by X Value
+    SUB.L   #05,        ENEMY_X     ; Move enemy by X Value
     RTS
 
 *-----------------------------------------------------------
@@ -303,18 +304,6 @@ DRAW_PLYR_DATA:
     MOVE.L  PLAYER_HEALTH,   D1     ; Move X to D1.L
     TRAP    #15                     ; Trap (Perform action)
     
-    
-*-----------------------------------------------------------
-* Subroutine    : Player Health Check
-* Description   : Updating the players health if they hit the enemy
-*-----------------------------------------------------------
-PLYR_HEALTH_CHECK:
-
-    MOVE.B  #0, D0
-    CMP.B   PLAYER_HEALTH, D0
-    BEQ     EXIT
-    RTS
-     
   
 *-----------------------------------------------------------
 * Subroutine    : Player is on Ground
@@ -368,6 +357,28 @@ PERFORM_JUMP:
     RTS                             ; Return to subroutine
 JUMP_DONE:
     RTS                             ; Return to subroutine
+    
+*-----------------------------------------------------------
+* Subroutine    : Player Health Check
+* Description   : Checking to see if the player has died
+*-----------------------------------------------------------    
+PLAYER_HEALTH_CHECK:
+    CLR         D1
+    MOVE.L      PLAYER_HEALTH, D1
+    CMP.L       #0, D1
+    BLE         EXIT
+    RTS
+    
+    
+*-----------------------------------------------------------
+* Subroutine    : Delay
+* Description   : Used to slow down the in game speed by using trap codes
+*-----------------------------------------------------------
+DELAY:
+    MOVE.L      #1, D1
+    MOVEQ       #23, D0
+    TRAP        #15
+
 
 *-----------------------------------------------------------
 * Subroutine    : Idle
@@ -514,7 +525,8 @@ COLLISION_CHECK_DONE:               ; No Collision Update points
 
 COLLISION:
     BSR     PLAY_OPPS               ; Play Opps Wav
-    SUB     #10, PLAYER_HEALTH      ; Subtracting 10 from the players health every time theres a collision
+    SUB     #1, PLAYER_HEALTH       ; Subtracting 1 from the players health every time theres a collision
+    BLE     RESET_ENEMY_POSITION    ; If the user gets hit it moves the enemy back so they dont get stuck in the enemy
     RTS                             ; Return to subroutine
 
 *-----------------------------------------------------------
@@ -592,6 +604,7 @@ RUN_WAV         DC.B    'run.wav',0         ; Run Sound
 OPPS_WAV        DC.B    'opps.wav',0        ; Collision Opps
 
     END    START        ; last line of source
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
