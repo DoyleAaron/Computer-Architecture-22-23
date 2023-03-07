@@ -183,10 +183,10 @@ PROCESS_INPUT:
 * Description   : A loop that increments the points by one each time
 *-----------------------------------------------------------
 POINTS_LOOP:
-    MOVE.L      #0, D3
-    ADD.L       #1, D3
-    ADD.L       PLAYER_SCORE, D3
-    MOVE.L      D3, PLAYER_SCORE
+    MOVE.L      #0, D3              ;Setting the data register 3 to 0
+    ADD.L       #1, D3              ; Adding one to this data register which will be the constant increment
+    ADD.L       PLAYER_SCORE, D3    ; Assigning this number to the current player score
+    MOVE.L      D3, PLAYER_SCORE    ; Updating the player score so its ready for the next increment
    
     
 
@@ -219,7 +219,7 @@ UPDATE:
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #8,        ENEMY_X         ; Move enemy by X Value which is 8 
+    SUB.L   #6,        ENEMY_X         ; Move enemy by X Value which is 6 
     RTS
 
 *-----------------------------------------------------------    
@@ -515,9 +515,12 @@ PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
     RTS
 
 COLLISION:
-    BSR     PLAY_OPPS               ; Play Opps Wav
-    DBF     D0, PLAYER_HEALTH    
-    RTS                             ; Return to subroutine
+    BSR         PLAY_OPPS            ; Play Opps Wav
+    MOVE.L      #1, D3               ; Setting the data register 3 to 0
+    SUB.L       PLAYER_HEALTH, D3    ; Assigning this number to the current player score
+    MOVE.L      D3, PLAYER_HEALTH
+    
+    RTS                              ; Return to subroutine
 
 *-----------------------------------------------------------
 * Subroutine    : EXIT
