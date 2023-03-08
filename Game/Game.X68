@@ -287,13 +287,21 @@ DRAW_PLYR_DATA:
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
     MOVE.W  #$0201,     D1          ; Col 02, Row 02
     TRAP    #15                     ; Trap (Perform action)
+    LEA     CTRL_MSG, A1            ; Escape to exit Message
+    MOVE    #13,        D0          ; No Line feed
+    TRAP    #15                     ; Trap (Perform action)
+    
+    ; Control Message
+    MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
+    MOVE.W  #$0202,     D1          ; Col 02, Row 02
+    TRAP    #15                     ; Trap (Perform action)
     LEA     ESC_MSG, A1             ; Escape to exit Message
     MOVE    #13,        D0          ; No Line feed
     TRAP    #15                     ; Trap (Perform action)
 
     ; Player Score Message
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
-    MOVE.W  #$0202,     D1          ; Col 02, Row 01
+    MOVE.W  #$0203,     D1          ; Col 02, Row 01
     TRAP    #15                     ; Trap (Perform action)
     LEA     SCORE_MSG,  A1          ; Score Message
     MOVE    #13,        D0          ; No Line feed
@@ -301,7 +309,7 @@ DRAW_PLYR_DATA:
 
     ; Player Score Value
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
-    MOVE.W  #$0A02,     D1          ; Col 10, Row 01
+    MOVE.W  #$0A03,     D1          ; Col 10, Row 01
     TRAP    #15                     ; Trap (Perform action)
     MOVE.B  #03,        D0          ; Display number at D1.L
     MOVE.L  PLAYER_SCORE,D1         ; Move Score to D1.L
@@ -309,7 +317,7 @@ DRAW_PLYR_DATA:
     
     ; Player Lives Message
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
-    MOVE.W  #$0203,     D1          ; Col 02, Row 02
+    MOVE.W  #$0204,     D1          ; Col 02, Row 02
     TRAP    #15                     ; Trap (Perform action)
     LEA     LIVES_MSG, A1           ; Lives Message
     MOVE    #13,        D0          ; No Line feed
@@ -317,7 +325,7 @@ DRAW_PLYR_DATA:
     
     ; Player Lives
     MOVE.B  #TC_CURSR_P, D0         ; Set Cursor Position
-    MOVE.W  #$0A03,     D1          ; Col 10, Row 02
+    MOVE.W  #$0A04,     D1          ; Col 10, Row 02
     TRAP    #15                     ; Trap (Perform action)
     MOVE.B  #03,        D0          ; Display number at D1.L
     MOVE.L  PLAYER_LIVES,   D1      ; Move X to D1.L
@@ -553,16 +561,17 @@ EXIT:
 
 *-----------------------------------------------------------
 * Section       : Messages
-* Description   : Messages to Print on Console, names should be
-* self documenting
+* Description   : Messages to Print on Console 
 *-----------------------------------------------------------
 SCORE_MSG       DC.B    'Score : ', 0           ; Score Message
 
 LIVES_MSG       DC.B    'Lives:', 0             ; Lives Position Message
 
-EXIT_MSG        DC.B    'GAME OVER!', 0        ; Exit Message
+EXIT_MSG        DC.B    'GAME OVER!', 0         ; Exit Message
 
 ESC_MSG         DC.B    'Press ESC to exit!',0  ; ESC to exit message
+
+CTRL_MSG        DC.B    'Press space to jump',0 ; Controls for user message 
 
 *-----------------------------------------------------------
 * Section       : Graphic Colors
