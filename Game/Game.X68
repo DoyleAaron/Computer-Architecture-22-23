@@ -436,7 +436,7 @@ PLAY_DEATH:
     MOVE    #DEATH_INDEX,D1         ; Load Sound INDEX
     MOVE    #72,        D0          ; Play Sound
     TRAP    #15                     ; Trap (Perform action)
-    BRA     EXIT                    ; Return to subroutine
+    RTS                             ; Return to subroutine
     
 *-----------------------------------------------------------
 * Subroutine    : Draw Player
@@ -536,15 +536,19 @@ COLLISION:
 *-----------------------------------------------------------
 EXIT:
     ; Show if Exiting is Running
-    BRA     PLAY_DEATH
+    BSR     PLAY_DEATH
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
     MOVE.W  #$4004,     D1          ; Col 40, Row 1
     TRAP    #15                     ; Trap (Perform action)
     LEA     EXIT_MSG,   A1          ; Exit
     MOVE    #13,        D0          ; No Line feed
     TRAP    #15                     ; Trap (Perform action)
+    MOVE.B  #94,        D0          ; Trap code for double buffer to update screen
+    TRAP    #15                     ; Trap
     MOVE.B  #TC_EXIT,   D0          ; Exit Code
     TRAP    #15                     ; Trap (Perform action)
+   
+
     SIMHALT
 
 *-----------------------------------------------------------
@@ -552,20 +556,20 @@ EXIT:
 * Description   : Messages to Print on Console, names should be
 * self documenting
 *-----------------------------------------------------------
-SCORE_MSG       DC.B    'Score : ', 0       ; Score Message
+SCORE_MSG       DC.B    'Score : ', 0           ; Score Message
 
-LIVES_MSG      DC.B    'Lives:', 0        ; Lives Position Message
+LIVES_MSG       DC.B    'Lives:', 0             ; Lives Position Message
 
-EXIT_MSG        DC.B    'Exiting....', 0    ; Exit Message
+EXIT_MSG        DC.B    'GAME OVER!', 0        ; Exit Message
 
-ESC_MSG         DC.B    'Press ESC to exit!',0  ;ESC to exit message
+ESC_MSG         DC.B    'Press ESC to exit!',0  ; ESC to exit message
 
 *-----------------------------------------------------------
 * Section       : Graphic Colors
 * Description   : Screen Pixel Color
 *-----------------------------------------------------------
-WHITE           EQU     $00FFFFFF
-RED             EQU     $000000FF
+WHITE           EQU     $00FFFFFF       ; Hex colour for white
+RED             EQU     $000000FF       ; Hex colour for red
 
 *-----------------------------------------------------------
 * Section       : Screen Size
@@ -587,7 +591,7 @@ CURRENT_KEY     DS.L    01  ; Reserve Space for Current Key Pressed
 PLAYER_X        DS.L    01  ; Reserve Space for Player X Position
 PLAYER_Y        DS.L    01  ; Reserve Space for Player Y Position
 PLAYER_SCORE    DS.L    01  ; Reserve Space for Player Score
-PLAYER_LIVES   DS.L    01  ; Reserve space for Player Lives
+PLAYER_LIVES   DS.L     01  ; Reserve space for Player Lives
 
 PLYR_VELOCITY   DS.L    01  ; Reserve Space for Player Velocity
 PLYR_GRAVITY    DS.L    01  ; Reserve Space for Player Gravity
@@ -604,7 +608,7 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 * generate and Audacity to convert MP3 to WAV
 *-----------------------------------------------------------
 JUMP_WAV        DC.B    'jump.wav',0            ; Jump Sound
-DEATH_WAV        DC.B    'death.wav',0          ; Death Sound
+DEATH_WAV       DC.B   'death.wav',0          ; Death Sound
     END    START                                ; last line of source
 
 
