@@ -29,7 +29,7 @@ PLYR_W_INIT EQU         08          ; Players initial Width
 PLYR_H_INIT EQU         08          ; Players initial Height
 
 PLYR_DFLT_V EQU         00          ; Default Player Velocity
-PLYR_JUMP_V EQU        -10          ; Player Jump Velocity
+PLYR_JUMP_V EQU        -15          ; Player Jump Velocity
 PLYR_DFLT_G EQU         01          ; Player Default Gravity
 
 GND_TRUE    EQU         01          ; Player on Ground True
@@ -219,7 +219,7 @@ UPDATE:
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #6,        ENEMY_X         ; Move enemy by X Value which is 6 
+    SUB.L   #4,        ENEMY_X         ; Move enemy by X Value which is 6 
     RTS
 
 *-----------------------------------------------------------    
@@ -516,9 +516,9 @@ PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
 
 COLLISION:
     BSR         PLAY_OPPS            ; Play Opps Wav
-    MOVE.L      #1, D3               ; Setting the data register 3 to 0
-    SUB.L       PLAYER_HEALTH, D3    ; Assigning this number to the current player score
-    MOVE.L      D3, PLAYER_HEALTH
+    MOVE.L      #1, D3               ; Setting the data register 3 to 1
+    SUB.L       D3, PLAYER_HEALTH    ; Assigning this number to the current player score
+    BGE         RESET_ENEMY_POSITION ; Moves the enemy postion so that user doesnt get stuck inside
     
     RTS                              ; Return to subroutine
 
@@ -596,6 +596,7 @@ JUMP_WAV        DC.B    'jump.wav',0        ; Jump Sound
 OPPS_WAV        DC.B    'opps.wav',0        ; Collision Opps
 
     END    START        ; last line of source
+
 
 
 *~Font name~Courier New~
