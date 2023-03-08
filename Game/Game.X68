@@ -1,5 +1,5 @@
 *-----------------------------------------------------------
-* Title      : Endless Runner Game
+* Title      : Box Adventure
 * Written by : Aaron Doyle
 * Date       : 03/03/23
 * Description: A simple endless runner made in assembly
@@ -21,7 +21,7 @@ TC_CURSR_P  EQU         11          ; Trap code cursor position
 TC_EXIT     EQU         09          ; Exit Trapcode
 
 *-----------------------------------------------------------
-* Section       : Charater Setup
+* Section       : Character Setup
 * Description   : Size of Player and Enemy and properties
 * of these characters e.g Starting Positions and Sizes
 *-----------------------------------------------------------
@@ -36,7 +36,9 @@ GND_TRUE    EQU         01          ; Player on Ground True
 GND_FALSE   EQU         00          ; Player on Ground False
   
 JMP_INDEX   EQU         01          ; Player Jump Sound Index  
-OPPS_INDEX  EQU         02          ; Player Opps Sound Index
+DEATH_INDEX  EQU         02          ; Player Death Sound Index
+
+
 
 ENMY_W_INIT EQU         08          ; Enemy initial Width
 ENMY_H_INIT EQU         08          ; Enemy initial Height
@@ -63,8 +65,8 @@ ESCAPE      EQU         $1B         ; Escape ASCII Keycode
 INITIALISE:
     ; Initialise Sounds
     BSR     JUMP_LOAD               ; Load Jump Sound into Memory
-    BSR     OPPS_LOAD               ; Load Opps (Collision) Sound into Memory
-
+    BSR     DEATH_LOAD              ; Load Death Sound into Memory
+    
     ; Screen Size
     MOVE.B  #TC_SCREEN, D0          ; access screen information
     MOVE.L  #TC_S_SIZE, D1          ; placing 0 in D1 triggers loading screen size information
@@ -380,11 +382,11 @@ JUMP_DONE:
 * Description   : Checking to see if the player has died
 *-----------------------------------------------------------    
 PLAYER_HEALTH_CHECK:
-    CLR         D1
-    MOVE.L      PLAYER_HEALTH, D1
-    CMP.L       #0, D1
-    BLE         EXIT
-    RTS
+    CLR         D1                  ; Clear d1
+    MOVE.L      PLAYER_HEALTH, D1   ; Moves player health into d1
+    CMP.L       #0, D1              ; Checks if player lives is equal to 0
+    BLE         EXIT                ; If it is go to exit routine, if not
+    RTS                             ; Return to subroutine
     
     
 *-----------------------------------------------------------
@@ -408,7 +410,7 @@ IDLE:
 *-----------------------------------------------------------
 * Subroutines   : Sound Load and Play
 * Description   : Initialise game sounds into memory 
-* Current Sounds are JUMP and Opps for Collision
+* Current Sounds are JUMP & DEATH 
 *-----------------------------------------------------------
 JUMP_LOAD:
     LEA     JUMP_WAV,   A1          ; Load Wav File into A1
@@ -423,19 +425,19 @@ PLAY_JUMP:
     TRAP    #15                     ; Trap (Perform action)
     RTS                             ; Return to subroutine
 
-OPPS_LOAD:
-    LEA     OPPS_WAV,   A1          ; Load Wav File into A1
-    MOVE    #OPPS_INDEX,D1          ; Assign it INDEX
-    MOVE    #71,        D0          ; Load into memory
+DEATH_LOAD:
+    LEA     DEATH_WAV,   A1          ; Load Wav File into A1
+    MOVE    #DEATH_INDEX, D1          ; Assign it INDEX
+    MOVE    #71,         D0          ; Load into memory
     TRAP    #15                     ; Trap (Perform action)
     RTS                             ; Return to subroutine
 
-PLAY_OPPS:
-    MOVE    #OPPS_INDEX,D1          ; Load Sound INDEX
+PLAY_DEATH:
+    MOVE    #DEATH_INDEX,D1         ; Load Sound INDEX
     MOVE    #72,        D0          ; Play Sound
     TRAP    #15                     ; Trap (Perform action)
-    RTS                             ; Return to subroutine
-
+    BRA     EXIT                    ; Return to subroutine
+    
 *-----------------------------------------------------------
 * Subroutine    : Draw Player
 * Description   : Draw Player Square
@@ -523,7 +525,6 @@ PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
     RTS
 
 COLLISION:
-    BSR         PLAY_OPPS            ; Play Opps Wav
     MOVE.L      #1, D3               ; Setting the data register 3 to 1
     SUB.L       D3, PLAYER_HEALTH    ; Assigning this number to the current player score
     BGE         RESET_ENEMY_POSITION ; Moves the enemy postion so that user doesnt get stuck inside
@@ -542,6 +543,7 @@ EXIT:
     LEA     EXIT_MSG,   A1          ; Exit
     MOVE    #13,        D0          ; No Line feed
     TRAP    #15                     ; Trap (Perform action)
+    BRA     PLAY_DEATH
     MOVE.B  #TC_EXIT,   D0          ; Exit Code
     TRAP    #15                     ; Trap (Perform action)
     SIMHALT
@@ -602,9 +604,8 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 * so keep the files small. Used https://voicemaker.in/ to 
 * generate and Audacity to convert MP3 to WAV
 *-----------------------------------------------------------
-JUMP_WAV        DC.B    'jump.wav',0        ; Jump Sound
-OPPS_WAV        DC.B    'opps.wav',0        ; Collision Opps
-
+JUMP_WAV        DC.B    'jump.wav',0         ; Jump Sound
+DEATH_WAV        DC.B    'death.wav',0        ; Death Sound
     END    START        ; last line of source
 
 
