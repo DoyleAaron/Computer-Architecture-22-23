@@ -3,6 +3,7 @@
 * Written by : Aaron Doyle
 * Date       : 03/03/23
 * Description: A simple endless runner made in assembly
+* Known Bugs: Sometimes the first enemy doesnt take a life
 *-----------------------------------------------------------
     ORG    $1000
 START:                                  ; first instruction of program
@@ -29,7 +30,7 @@ PLYR_W_INIT EQU         08              ; Players initial Width
 PLYR_H_INIT EQU         08              ; Players initial Height
 
 PLYR_DFLT_V EQU         00              ; Default Player Velocity
-PLYR_JUMP_V EQU        -15              ; Player Jump Velocity
+PLYR_JUMP_V EQU        -10              ; Player Jump Velocity
 PLYR_DFLT_G EQU         01              ; Player Default Gravity
 
 GND_TRUE    EQU         01              ; Player on Ground True
@@ -619,6 +620,7 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 JUMP_WAV        DC.B    'jump.wav',0            ; Jump Sound
 DEATH_WAV       DC.B   'death.wav',0          ; Death Sound
     END    START                                ; last line of source
+
 
 
 
