@@ -2,7 +2,7 @@
 * Title      : Box Adventure
 * Written by : Aaron Doyle
 * Date       : 03/03/23
-* Description: A simple endless runner made in assembly
+* Description: A simple endless runner made in assembly code
 * Known Bugs: Sometimes the first enemy doesnt take a life
 *-----------------------------------------------------------
     ORG    $1000
@@ -37,7 +37,7 @@ GND_TRUE    EQU         01              ; Player on Ground True
 GND_FALSE   EQU         00              ; Player on Ground False
   
 JMP_INDEX   EQU         01              ; Player Jump Sound Index  
-DEATH_INDEX  EQU         02             ; Player Death Sound Index
+DEATH_INDEX  EQU        02              ; Player Death Sound Index
 
 
 
@@ -93,9 +93,9 @@ INITIALISE:
     MOVE.L  D1,         PLAYER_SCORE
     
     ;Initialise Player Lives
-    CLR.L   D1                          ;Clear contents of D1
-    MOVE.L  #5,        D1               ;Player lives set to 5
-    MOVE.L  D1,         PLAYER_LIVES
+    CLR.L   D1                          ; Clear contents of D1
+    MOVE.L  #5,        D1               ; Moving the number five into D1
+    MOVE.L  D1,         PLAYER_LIVES    ; Assigning the 5 lives into Player Lives
 
     ; Initialise Player Velocity
     CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
@@ -504,40 +504,40 @@ DRAW_ENEMY:
 * PLAYER_H + PLAYER_Y >= ENEMY_Y
 *-----------------------------------------------------------
 CHECK_COLLISIONS:
-    CLR.L   D1                      ; Clear D1
-    CLR.L   D2                      ; Clear D2
+    CLR.L   D1                              ; Clear D1
+    CLR.L   D2                              ; Clear D2
 PLAYER_X_LTE_TO_ENEMY_X_PLUS_W:
-    MOVE.L  PLAYER_X,   D1          ; Move Player X to D1
-    MOVE.L  ENEMY_X,    D2          ; Move Enemy X to D2
-    ADD.L   ENMY_W_INIT,D2          ; Set Enemy width X + Width
-    CMP.L   D1,         D2          ; Do the Overlap ?
+    MOVE.L  PLAYER_X,   D1                  ; Move Player X to D1
+    MOVE.L  ENEMY_X,    D2                  ; Move Enemy X to D2
+    ADD.L   ENMY_W_INIT,D2                  ; Set Enemy width X + Width
+    CMP.L   D1,         D2                  ; Do the Overlap ?
     BLE     PLAYER_X_PLUS_W_LTE_TO_ENEMY_X  ; Less than or Equal ?
     RTS
-PLAYER_X_PLUS_W_LTE_TO_ENEMY_X:     ; Check player is not  
-    ADD.L   PLYR_W_INIT,D1          ; Move Player Width to D1
-    MOVE.L  ENEMY_X,    D2          ; Move Enemy X to D2
-    CMP.L   D1,         D2          ; Do they OverLap ?
+PLAYER_X_PLUS_W_LTE_TO_ENEMY_X:             ; Check player is not  
+    ADD.L   PLYR_W_INIT,D1                  ; Move Player Width to D1
+    MOVE.L  ENEMY_X,    D2                  ; Move Enemy X to D2
+    CMP.L   D1,         D2                  ; Do they OverLap ?
     BGE     PLAYER_Y_LTE_TO_ENEMY_Y_PLUS_H  ; Less than or Equal
     RTS   
 PLAYER_Y_LTE_TO_ENEMY_Y_PLUS_H:     
-    MOVE.L  PLAYER_Y,   D1          ; Move Player Y to D1
-    MOVE.L  ENEMY_Y,    D2          ; Move Enemy Y to D2
-    ADD.L   ENMY_H_INIT,D2          ; Set Enemy Height to D2
-    CMP.L   D1,         D2          ; Do they Overlap ?
+    MOVE.L  PLAYER_Y,   D1                  ; Move Player Y to D1
+    MOVE.L  ENEMY_Y,    D2                  ; Move Enemy Y to D2
+    ADD.L   ENMY_H_INIT,D2                  ; Set Enemy Height to D2
+    CMP.L   D1,         D2                  ; Do they Overlap ?
     BLE     PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y  ; Less than or Equal
     RTS 
-PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
-    ADD.L   PLYR_H_INIT,D1          ; Add Player Height to D1
-    MOVE.L  ENEMY_Y,    D2          ; Move Enemy Height to D2  
-    CMP.L   D1,         D2          ; Do they OverLap ?
-    BGE     COLLISION               ; Collision !
+PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:             ; Less than or Equal ?
+    ADD.L   PLYR_H_INIT,D1                  ; Add Player Height to D1
+    MOVE.L  ENEMY_Y,    D2                  ; Move Enemy Height to D2  
+    CMP.L   D1,         D2                  ; Do they OverLap ?
+    BGE     COLLISION                       ; Collision !
     RTS
 
 COLLISION:
-    MOVE.L      #1, D3                  ; Setting the data register 3 to 1
-    SUB.L       D3, PLAYER_LIVES        ; Assigning this number to the current player score
-    BGE         RESET_ENEMY_POSITION    ; Moves the enemy postion so that user doesnt get stuck inside
-    RTS                                 ; Return to subroutine
+    MOVE.L      #1, D3                      ; Setting the data register 3 to 1
+    SUB.L       D3, PLAYER_LIVES            ; Assigning this number to the current player score
+    BGE         RESET_ENEMY_POSITION        ; Moves the enemy postion so that user doesnt get stuck inside
+    RTS                                     ; Return to subroutine
 
 *-----------------------------------------------------------
 * Subroutine    : EXIT
@@ -546,16 +546,16 @@ COLLISION:
 EXIT:
     ; Show if Exiting is Running
     BSR     PLAY_DEATH
-    MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
-    MOVE.W  #$4004,     D1          ; Col 40, Row 1
-    TRAP    #15                     ; Trap (Perform action)
-    LEA     EXIT_MSG,   A1          ; Exit
-    MOVE    #13,        D0          ; No Line feed
-    TRAP    #15                     ; Trap (Perform action)
-    MOVE.B  #94,        D0          ; Trap code for double buffer to update screen
-    TRAP    #15                     ; Trap
-    MOVE.B  #TC_EXIT,   D0          ; Exit Code
-    TRAP    #15                     ; Trap (Perform action)
+    MOVE.B  #TC_CURSR_P,D0                  ; Set Cursor Position
+    MOVE.W  #$4004,     D1                  ; Col 40, Row 1
+    TRAP    #15                             ; Trap (Perform action)
+    LEA     EXIT_MSG,   A1                  ; Exit
+    MOVE    #13,        D0                  ; No Line feed
+    TRAP    #15                             ; Trap (Perform action)
+    MOVE.B  #94,        D0                  ; Trap code for double buffer to update screen
+    TRAP    #15                             ; Trap
+    MOVE.B  #TC_EXIT,   D0                  ; Exit Code
+    TRAP    #15                             ; Trap (Perform action)
    
 
     SIMHALT
@@ -564,15 +564,15 @@ EXIT:
 * Section       : Messages
 * Description   : Messages to Print on Console 
 *-----------------------------------------------------------
-SCORE_MSG       DC.B    'Score : ', 0           ; Score Message
+SCORE_MSG       DC.B    'Score : ', 0                       ; Score Message
 
-LIVES_MSG       DC.B    'Lives:', 0             ; Lives Position Message
+LIVES_MSG       DC.B    'Lives:', 0                         ; Lives Position Message
 
-EXIT_MSG        DC.B    'GAME OVER!', 0         ; Exit Message
+EXIT_MSG        DC.B    'GAME OVER!', 0                     ; Exit Message
 
-ESC_MSG         DC.B    'Press ESC to exit!',0  ; ESC to exit message
+ESC_MSG         DC.B    'Press ESC to exit!',0              ; ESC to exit message
 
-CTRL_MSG        DC.B    'Press the SPACE key to jump!',0 ; Controls for user message 
+CTRL_MSG        DC.B    'Press the SPACE key to jump!',0    ; Controls for user message 
 
 *-----------------------------------------------------------
 * Section       : Graphic Colors
@@ -601,7 +601,7 @@ CURRENT_KEY     DS.L    01  ; Reserve Space for Current Key Pressed
 PLAYER_X        DS.L    01  ; Reserve Space for Player X Position
 PLAYER_Y        DS.L    01  ; Reserve Space for Player Y Position
 PLAYER_SCORE    DS.L    01  ; Reserve Space for Player Score
-PLAYER_LIVES   DS.L     01  ; Reserve space for Player Lives
+PLAYER_LIVES    DS.L    01  ; Reserve space for Player Lives
 
 PLYR_VELOCITY   DS.L    01  ; Reserve Space for Player Velocity
 PLYR_GRAVITY    DS.L    01  ; Reserve Space for Player Gravity
@@ -618,7 +618,7 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 * generate and Audacity to convert MP3 to WAV
 *-----------------------------------------------------------
 JUMP_WAV        DC.B    'jump.wav',0            ; Jump Sound
-DEATH_WAV       DC.B   'death.wav',0          ; Death Sound
+DEATH_WAV       DC.B   'death.wav',0            ; Death Sound
     END    START                                ; last line of source
 
 
