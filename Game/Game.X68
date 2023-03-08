@@ -5,57 +5,57 @@
 * Description: A simple endless runner made in assembly
 *-----------------------------------------------------------
     ORG    $1000
-START:                  ; first instruction of program
+START:                                  ; first instruction of program
 
 *-----------------------------------------------------------
 * Section       : Trap Codes
 * Description   : Trap Codes used throughout StarterKit
 *-----------------------------------------------------------
 * Trap CODES
-TC_SCREEN   EQU         33          ; Screen size information trap code
-TC_S_SIZE   EQU         00          ; Places 0 in D1.L to retrieve Screen width and height in D1.L
-TC_KEYCODE  EQU         19          ; Check for pressed keys
-TC_DBL_BUF  EQU         92          ; Double Buffer Screen Trap Code
-TC_CURSR_P  EQU         11          ; Trap code cursor position
+TC_SCREEN   EQU         33              ; Screen size information trap code
+TC_S_SIZE   EQU         00              ; Places 0 in D1.L to retrieve Screen width and height in D1.L
+TC_KEYCODE  EQU         19              ; Check for pressed keys
+TC_DBL_BUF  EQU         92              ; Double Buffer Screen Trap Code
+TC_CURSR_P  EQU         11              ; Trap code cursor position
 
-TC_EXIT     EQU         09          ; Exit Trapcode
+TC_EXIT     EQU         09              ; Exit Trapcode
 
 *-----------------------------------------------------------
 * Section       : Character Setup
 * Description   : Size of Player and Enemy and properties
 * of these characters e.g Starting Positions and Sizes
 *-----------------------------------------------------------
-PLYR_W_INIT EQU         08          ; Players initial Width
-PLYR_H_INIT EQU         08          ; Players initial Height
+PLYR_W_INIT EQU         08              ; Players initial Width
+PLYR_H_INIT EQU         08              ; Players initial Height
 
-PLYR_DFLT_V EQU         00          ; Default Player Velocity
-PLYR_JUMP_V EQU        -15          ; Player Jump Velocity
-PLYR_DFLT_G EQU         01          ; Player Default Gravity
+PLYR_DFLT_V EQU         00              ; Default Player Velocity
+PLYR_JUMP_V EQU        -15              ; Player Jump Velocity
+PLYR_DFLT_G EQU         01              ; Player Default Gravity
 
-GND_TRUE    EQU         01          ; Player on Ground True
-GND_FALSE   EQU         00          ; Player on Ground False
+GND_TRUE    EQU         01              ; Player on Ground True
+GND_FALSE   EQU         00              ; Player on Ground False
   
-JMP_INDEX   EQU         01          ; Player Jump Sound Index  
-DEATH_INDEX  EQU         02          ; Player Death Sound Index
+JMP_INDEX   EQU         01              ; Player Jump Sound Index  
+DEATH_INDEX  EQU         02             ; Player Death Sound Index
 
 
 
-ENMY_W_INIT EQU         08          ; Enemy initial Width
-ENMY_H_INIT EQU         08          ; Enemy initial Height
+ENMY_W_INIT EQU         08              ; Enemy initial Width
+ENMY_H_INIT EQU         08              ; Enemy initial Height
 
 *-----------------------------------------------------------
 * Section       : Game Stats
 * Description   : Points
 *-----------------------------------------------------------
-POINTS      EQU         00          ; Points added
+POINTS      EQU         00              ; Points added
 
 *-----------------------------------------------------------
 * Section       : Keyboard Keys
 * Description   : Spacebar and Escape or two functioning keys
 * Spacebar to JUMP and Escape to Exit Game
 *-----------------------------------------------------------
-SPACEBAR    EQU         $20         ; Spacebar ASCII Keycode
-ESCAPE      EQU         $1B         ; Escape ASCII Keycode
+SPACEBAR    EQU         $20             ; Spacebar ASCII Keycode
+ESCAPE      EQU         $1B             ; Escape ASCII Keycode
 
 *-----------------------------------------------------------
 * Subroutine    : Initialise
@@ -64,70 +64,70 @@ ESCAPE      EQU         $1B         ; Escape ASCII Keycode
 *-----------------------------------------------------------
 INITIALISE:
     ; Initialise Sounds
-    BSR     JUMP_LOAD               ; Load Jump Sound into Memory
-    BSR     DEATH_LOAD              ; Load Death Sound into Memory
+    BSR     JUMP_LOAD                   ; Load Jump Sound into Memory
+    BSR     DEATH_LOAD                  ; Load Death Sound into Memory
     
     ; Screen Size
-    MOVE.B  #TC_SCREEN, D0          ; access screen information
-    MOVE.L  #TC_S_SIZE, D1          ; placing 0 in D1 triggers loading screen size information
-    TRAP    #15                     ; interpret D0 and D1 for screen size
-    MOVE.W  D1,         SCREEN_H    ; place screen height in memory location
-    SWAP    D1                      ; Swap top and bottom word to retrive screen size
-    MOVE.W  D1,         SCREEN_W    ; place screen width in memory location
+    MOVE.B  #TC_SCREEN, D0              ; access screen information
+    MOVE.L  #TC_S_SIZE, D1              ; placing 0 in D1 triggers loading screen size information
+    TRAP    #15                         ; interpret D0 and D1 for screen size
+    MOVE.W  D1,         SCREEN_H        ; place screen height in memory location
+    SWAP    D1                          ; Swap top and bottom word to retrive screen size
+    MOVE.W  D1,         SCREEN_W        ; place screen width in memory location
 
     ; Place the Player at the center of the screen
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.W  SCREEN_W,   D1          ; Place Screen width in D1
-    DIVU    #02,        D1          ; divide by 2 for center on X Axis
-    MOVE.L  D1,         PLAYER_X    ; Players X Position
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.W  SCREEN_W,   D1              ; Place Screen width in D1
+    DIVU    #02,        D1              ; divide by 2 for center on X Axis
+    MOVE.L  D1,         PLAYER_X        ; Players X Position
 
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.W  SCREEN_H,   D1          ; Place Screen width in D1
-    DIVU    #02,        D1          ; divide by 2 for center on Y Axis
-    MOVE.L  D1,         PLAYER_Y    ; Players Y Position
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.W  SCREEN_H,   D1              ; Place Screen width in D1
+    DIVU    #02,        D1              ; divide by 2 for center on Y Axis
+    MOVE.L  D1,         PLAYER_Y        ; Players Y Position
 
     ; Initialise Player Score
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.L  #00,        D1          ; Init Score
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.L  #00,        D1              ; Init Score
     MOVE.L  D1,         PLAYER_SCORE
     
-    ;Initialise Player Health
-    CLR.L   D1                         ;Clear contents of D1
-    MOVE.L  #5,        D1             ;Player lives set to 5
-    MOVE.L  D1,         PLAYER_HEALTH
+    ;Initialise Player Lives
+    CLR.L   D1                          ;Clear contents of D1
+    MOVE.L  #5,        D1               ;Player lives set to 5
+    MOVE.L  D1,         PLAYER_LIVES
 
     ; Initialise Player Velocity
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.B  #PLYR_DFLT_V,D1         ; Init Player Velocity
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.B  #PLYR_DFLT_V,D1             ; Init Player Velocity
     MOVE.L  D1,         PLYR_VELOCITY
 
     ; Initialise Player Gravity
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.L  #PLYR_DFLT_G,D1         ; Init Player Gravity
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.L  #PLYR_DFLT_G,D1             ; Init Player Gravity
     MOVE.L  D1,         PLYR_GRAVITY
 
     ; Initialize Player on Ground
-    MOVE.L  #GND_TRUE,  PLYR_ON_GND ; Init Player on Ground
+    MOVE.L  #GND_TRUE,  PLYR_ON_GND     ; Init Player on Ground
 
     ; Initial Position for Enemy
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.W  SCREEN_W,   D1          ; Place Screen width in D1
-    MOVE.L  D1,         ENEMY_X     ; Enemy X Position
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.W  SCREEN_W,   D1              ; Place Screen width in D1
+    MOVE.L  D1,         ENEMY_X         ; Enemy X Position
 
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.W  SCREEN_H,   D1          ; Place Screen width in D1
-    DIVU    #02,        D1          ; divide by 2 for center on Y Axis
-    MOVE.L  D1,         ENEMY_Y     ; Enemy Y Position
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.W  SCREEN_H,   D1              ; Place Screen width in D1
+    DIVU    #02,        D1              ; divide by 2 for center on Y Axis
+    MOVE.L  D1,         ENEMY_Y         ; Enemy Y Position
 
     ; Enable the screen back buffer(see easy 68k help)
-	MOVE.B  #TC_DBL_BUF,D0          ; 92 Enables Double Buffer
-    MOVE.B  #17,        D1          ; Combine Tasks
-	TRAP	#15                     ; Trap (Perform action)
+	MOVE.B  #TC_DBL_BUF,D0              ; 92 Enables Double Buffer
+    MOVE.B  #17,        D1              ; Combine Tasks
+	TRAP	#15                         ; Trap (Perform action)
 
     ; Clear the screen (see easy 68k help)
-    MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
-	MOVE.W  #$FF00,     D1          ; Fill Screen Clear
-	TRAP	#15                     ; Trap (Perform action)
+    MOVE.B  #TC_CURSR_P,D0              ; Set Cursor Position
+	MOVE.W  #$FF00,     D1              ; Fill Screen Clear
+	TRAP	#15                         ; Trap (Perform action)
 
 *-----------------------------------------------------------
 * Subroutine    : Gameloop
@@ -142,7 +142,7 @@ GAMELOOP:
     BSR     UPDATE                  ; Update positions and points
     BSR     IS_PLAYER_ON_GND        ; Check if player is on ground
     BSR     CHECK_COLLISIONS        ; Check for Collisions
-    BSR     PLAYER_HEALTH_CHECK     ; Checking if the players health is 0
+    BSR     PLAYER_LIVES_CHECK      ; Checking if the players lives are 0
     BSR     DRAW                    ; Draw the Scene
     BSR     FLOOR_DRAW              ; Draw the floor
     BSR     POINTS_LOOP             ; Increments the points
@@ -185,7 +185,7 @@ PROCESS_INPUT:
 * Description   : A loop that increments the points by one each time
 *-----------------------------------------------------------
 POINTS_LOOP:
-    MOVE.L      #0, D3              ;Setting the data register 3 to 0
+    MOVE.L      #0, D3              ; Setting the data register 3 to 0
     ADD.L       #1, D3              ; Adding one to this data register which will be the constant increment
     ADD.L       PLAYER_SCORE, D3    ; Assigning this number to the current player score
     MOVE.L      D3, PLAYER_SCORE    ; Updating the player score so its ready for the next increment
@@ -221,7 +221,7 @@ UPDATE:
 * Description   : Move Enemy Right to Left
 *-----------------------------------------------------------
 MOVE_ENEMY:
-    SUB.L   #4,        ENEMY_X         ; Move enemy by X Value which is 6 
+    SUB.L   #4,        ENEMY_X          ; Move enemy by X Value which is 6 
     RTS
 
 *-----------------------------------------------------------    
@@ -265,12 +265,12 @@ FLOOR_DRAW:
     MOVE.L  #$00A020F0, D1      ; Setting the colour of the line to purple using hex codes
     TRAP    #15
     
-    CLR.L   D1
-    MOVE.B  #84, D0         ; Trap code to draw a line
-    MOVE.W  #10, D1         ; Setting the start X value
-    MOVE.W  #250, D2        ; Setting the end X value
-    MOVE.W  #SCREEN_W, D3   ; Setting the length of the line
-    MOVE.W  #250, D4        ; Setting the Y value of the line
+    CLR.L   D1                  ; Clear D1
+    MOVE.B  #84, D0             ; Trap code to draw a line
+    MOVE.W  #10, D1             ; Setting the start X value
+    MOVE.W  #250, D2            ; Setting the end X value
+    MOVE.W  #SCREEN_W, D3       ; Setting the length of the line
+    MOVE.W  #250, D4            ; Setting the Y value of the line
     TRAP    #15
     
     
@@ -307,20 +307,20 @@ DRAW_PLYR_DATA:
     MOVE.L  PLAYER_SCORE,D1         ; Move Score to D1.L
     TRAP    #15                     ; Trap (Perform action)
     
-    ; Player Health Message
+    ; Player Lives Message
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
     MOVE.W  #$0203,     D1          ; Col 02, Row 02
     TRAP    #15                     ; Trap (Perform action)
-    LEA     HEALTH_MSG, A1          ; Health Message
+    LEA     LIVES_MSG, A1           ; Lives Message
     MOVE    #13,        D0          ; No Line feed
     TRAP    #15                     ; Trap (Perform action)
     
-    ; Player Health
+    ; Player Lives
     MOVE.B  #TC_CURSR_P, D0         ; Set Cursor Position
     MOVE.W  #$0A03,     D1          ; Col 10, Row 02
     TRAP    #15                     ; Trap (Perform action)
     MOVE.B  #03,        D0          ; Display number at D1.L
-    MOVE.L  PLAYER_HEALTH,   D1     ; Move X to D1.L
+    MOVE.L  PLAYER_LIVES,   D1      ; Move X to D1.L
     TRAP    #15                     ; Trap (Perform action)
     
   
@@ -345,14 +345,14 @@ IS_PLAYER_ON_GND:
 * Description   : Set the Player On Ground
 *-----------------------------------------------------------
 SET_ON_GROUND:
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.W  SCREEN_H,   D1          ; Place Screen width in D1
-    DIVU    #02,        D1          ; divide by 2 for center on Y Axis
-    MOVE.L  D1,         PLAYER_Y    ; Reset the Player Y Position
-    CLR.L   D1                      ; Clear contents of D1 (XOR is faster)
-    MOVE.L  #00,        D1          ; Player Velocity
-    MOVE.L  D1,         PLYR_VELOCITY ; Set Player Velocity
-    MOVE.L  #GND_TRUE,  PLYR_ON_GND ; Player is on Ground
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.W  SCREEN_H,   D1              ; Place Screen width in D1
+    DIVU    #02,        D1              ; divide by 2 for center on Y Axis
+    MOVE.L  D1,         PLAYER_Y        ; Reset the Player Y Position
+    CLR.L   D1                          ; Clear contents of D1 (XOR is faster)
+    MOVE.L  #00,        D1              ; Player Velocity
+    MOVE.L  D1,         PLYR_VELOCITY   ; Set Player Velocity
+    MOVE.L  #GND_TRUE,  PLYR_ON_GND     ; Player is on Ground
     RTS
 
 *-----------------------------------------------------------
@@ -367,23 +367,23 @@ SET_OFF_GROUND:
 * Description   : Perform a Jump
 *-----------------------------------------------------------
 JUMP:
-    CMP.L   #GND_TRUE,PLYR_ON_GND   ; Player is on the Ground ?
-    BEQ     PERFORM_JUMP            ; Do Jump
-    BRA     JUMP_DONE               ;
+    CMP.L   #GND_TRUE,PLYR_ON_GND       ; Player is on the Ground ?
+    BEQ     PERFORM_JUMP                ; Do Jump
+    BRA     JUMP_DONE                   ; Branch to Jump Done
 PERFORM_JUMP:
-    BSR     PLAY_JUMP               ; Play jump sound
-    MOVE.L  #PLYR_JUMP_V,PLYR_VELOCITY ; Set the players velocity to true
-    RTS                             ; Return to subroutine
+    BSR     PLAY_JUMP                   ; Play jump sound
+    MOVE.L  #PLYR_JUMP_V,PLYR_VELOCITY  ; Set the players velocity to true
+    RTS                                 ; Return to subroutine
 JUMP_DONE:
-    RTS                             ; Return to subroutine
+    RTS                                 ; Return to subroutine
     
 *-----------------------------------------------------------
-* Subroutine    : Player Health Check
+* Subroutine    : Player Lives Check
 * Description   : Checking to see if the player has died
 *-----------------------------------------------------------    
-PLAYER_HEALTH_CHECK:
+PLAYER_LIVES_CHECK:
     CLR         D1                  ; Clear d1
-    MOVE.L      PLAYER_HEALTH, D1   ; Moves player health into d1
+    MOVE.L      PLAYER_LIVES, D1    ; Moves player Lives into d1
     CMP.L       #0, D1              ; Checks if player lives is equal to 0
     BLE         EXIT                ; If it is go to exit routine, if not
     RTS                             ; Return to subroutine
@@ -426,9 +426,9 @@ PLAY_JUMP:
     RTS                             ; Return to subroutine
 
 DEATH_LOAD:
-    LEA     DEATH_WAV,   A1          ; Load Wav File into A1
-    MOVE    #DEATH_INDEX, D1          ; Assign it INDEX
-    MOVE    #71,         D0          ; Load into memory
+    LEA     DEATH_WAV,   A1         ; Load Wav File into A1
+    MOVE    #DEATH_INDEX, D1        ; Assign it INDEX
+    MOVE    #71,         D0         ; Load into memory
     TRAP    #15                     ; Trap (Perform action)
     RTS                             ; Return to subroutine
 
@@ -525,11 +525,10 @@ PLAYER_Y_PLUS_H_LTE_TO_ENEMY_Y:     ; Less than or Equal ?
     RTS
 
 COLLISION:
-    MOVE.L      #1, D3               ; Setting the data register 3 to 1
-    SUB.L       D3, PLAYER_HEALTH    ; Assigning this number to the current player score
-    BGE         RESET_ENEMY_POSITION ; Moves the enemy postion so that user doesnt get stuck inside
-    
-    RTS                              ; Return to subroutine
+    MOVE.L      #1, D3                  ; Setting the data register 3 to 1
+    SUB.L       D3, PLAYER_LIVES        ; Assigning this number to the current player score
+    BGE         RESET_ENEMY_POSITION    ; Moves the enemy postion so that user doesnt get stuck inside
+    RTS                                 ; Return to subroutine
 
 *-----------------------------------------------------------
 * Subroutine    : EXIT
@@ -537,13 +536,13 @@ COLLISION:
 *-----------------------------------------------------------
 EXIT:
     ; Show if Exiting is Running
+    BRA     PLAY_DEATH
     MOVE.B  #TC_CURSR_P,D0          ; Set Cursor Position
     MOVE.W  #$4004,     D1          ; Col 40, Row 1
     TRAP    #15                     ; Trap (Perform action)
     LEA     EXIT_MSG,   A1          ; Exit
     MOVE    #13,        D0          ; No Line feed
     TRAP    #15                     ; Trap (Perform action)
-    BRA     PLAY_DEATH
     MOVE.B  #TC_EXIT,   D0          ; Exit Code
     TRAP    #15                     ; Trap (Perform action)
     SIMHALT
@@ -555,7 +554,7 @@ EXIT:
 *-----------------------------------------------------------
 SCORE_MSG       DC.B    'Score : ', 0       ; Score Message
 
-HEALTH_MSG      DC.B    'Lives:', 0        ; Health Position Message
+LIVES_MSG      DC.B    'Lives:', 0        ; Lives Position Message
 
 EXIT_MSG        DC.B    'Exiting....', 0    ; Exit Message
 
@@ -588,7 +587,7 @@ CURRENT_KEY     DS.L    01  ; Reserve Space for Current Key Pressed
 PLAYER_X        DS.L    01  ; Reserve Space for Player X Position
 PLAYER_Y        DS.L    01  ; Reserve Space for Player Y Position
 PLAYER_SCORE    DS.L    01  ; Reserve Space for Player Score
-PLAYER_HEALTH   DS.L    01  ; Reserve space for Player Health
+PLAYER_LIVES   DS.L    01  ; Reserve space for Player Lives
 
 PLYR_VELOCITY   DS.L    01  ; Reserve Space for Player Velocity
 PLYR_GRAVITY    DS.L    01  ; Reserve Space for Player Gravity
@@ -604,9 +603,9 @@ ENEMY_Y         DS.L    01  ; Reserve Space for Enemy Y Position
 * so keep the files small. Used https://voicemaker.in/ to 
 * generate and Audacity to convert MP3 to WAV
 *-----------------------------------------------------------
-JUMP_WAV        DC.B    'jump.wav',0         ; Jump Sound
-DEATH_WAV        DC.B    'death.wav',0        ; Death Sound
-    END    START        ; last line of source
+JUMP_WAV        DC.B    'jump.wav',0            ; Jump Sound
+DEATH_WAV        DC.B    'death.wav',0          ; Death Sound
+    END    START                                ; last line of source
 
 
 
