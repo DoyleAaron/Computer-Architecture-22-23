@@ -572,7 +572,9 @@ EXIT_MSG        DC.B    'GAME OVER!', 0                     ; Exit Message
 
 ESC_MSG         DC.B    'Press ESC to exit!',0              ; ESC to exit message
 
-CTRL_MSG        DC.B    'Press the SPACE key to jump!',0    ; Controls for user message 
+CTRL_MSG        DC.B    'Press the SPACE key to jump!',0    ; Controls for user message
+
+
 
 *-----------------------------------------------------------
 * Section       : Graphic Colors
